@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 
@@ -25,6 +26,7 @@ public class Interviewer {
     private String interviewername;
     @Transient
     private String employeeid;
+  
     private String interviewerid;
 	public long getId() {
 		return id;
