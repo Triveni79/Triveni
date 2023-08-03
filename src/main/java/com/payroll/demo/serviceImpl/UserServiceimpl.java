@@ -24,15 +24,15 @@ public class UserServiceimpl implements UserService{
 	
 	
 	@Override
-	public int loginValidation(String username, String password) {
+	public int loginValidation(String official_Email, String official_Mail_Password) {
 		
 		try {
-			PreparedStatement statement = connection.prepareStatement("SELECT username,password FROM users where username='"+username+"'");
+			PreparedStatement statement = connection.prepareStatement("SELECT official_Email,official_Mail_Password FROM login_Credentials where official_Email='"+official_Email+"'");
 			ResultSet rs = statement.executeQuery();
 			
 			
 			while(rs.next()) {
-				if(rs.getString(1).equals(username) && rs.getString(2).equals(password)) {
+				if(rs.getString(1).equals(official_Email) && rs.getString(2).equals(official_Mail_Password)) {
 					flag = 1;
 				}
 				else {

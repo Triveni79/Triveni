@@ -1,15 +1,12 @@
 package com.payroll.demo.controller;
 
 
-
-
-
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Date;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 import javax.validation.Valid;
 
@@ -21,142 +18,151 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.multipart.MultipartFile;
 
 import com.payroll.demo.entity.AddEmployee;
 import com.payroll.demo.entity.Candidate;
-import com.payroll.demo.repository.AddEmployeeRepo;
-import com.payroll.demo.repository.CandidateRepo;
+import com.payroll.demo.serviceImpl.AddEmployeeServiceImpl;
+
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 @RestController
-@RequestMapping("/home")
+@RequestMapping("/api")
 public class AddEmployeeController {
 
-	@Autowired
-	private AddEmployeeRepo addEmployeeRepo;
+	    @Autowired
+	    private AddEmployeeServiceImpl employeeService;
+	    
+//	    @Autowired
+//	    private AddCandidateServiceImpl candidateService;
 
-	@Autowired
-	private CandidateRepo candidateRepo;
+	    
+	    @GetMapping("/all/{empId}")
+	    public AddEmployee getEmployee(@PathVariable String empId) {
+	      return employeeService.getEmployeeById(empId);
+	    }
 
-	private static int n = 001;
+	    @PostMapping("/employee")
+	    public AddEmployee saveEmployeeDetails(@Valid @ModelAttribute("addEmployee") AddEmployee emp,
+	                                BindingResult result, Model model,
+	                                @RequestParam("joiningDateString") String joiningDateString,
+	                                @RequestParam("offerLetter") MultipartFile offerLetter,
+	                                @RequestParam("joiningLetter") MultipartFile joiningLetter,
+	                                @RequestParam("agreement") MultipartFile agreement,
+	                                @RequestParam("experienceLetter") MultipartFile experienceLetter,
+	                                @RequestParam("photo") MultipartFile photo,
+	                                @RequestParam("accountHolderName") String accountHolderName,
+	                                @RequestParam("accountNumber") String accountNumber, 
+	                                @RequestParam("ifscCode") String ifscCode,
+	                                @RequestParam("branch") String branch,
+	                                @RequestParam("bankName") String bankName,
+	                                @RequestParam("panCard") String panCard,
+	                                @RequestParam("bloodGroup") String bloodGroup, 
+	                                @RequestParam("nominee") String nominee, 
+	                                @RequestParam("nomineeContact") String nomineeContact
+	                                )
+	            throws IOException {
+	    	java.sql.Date sqlDate = java.sql.Date.valueOf(joiningDateString);
+	        emp.setJoiningDate(sqlDate);
+	        emp.setExperienceLetter(experienceLetter.getBytes());
+	        emp.setAgreement(agreement.getBytes());
+	        emp.setJoiningLetter(joiningLetter.getBytes());
+	        emp.setPhoto(photo.getBytes());
+	        emp.setOfferLetter(offerLetter.getBytes());
+	        emp.setAccountHolderName(accountHolderName);
+	        emp.setAccountNumber(accountNumber);
+	        emp.setBankName(bankName);
+	        emp.setBloodGroup(bloodGroup);
+	        emp.setBranch(branch);
+	        emp.setIfscCode(ifscCode);
+	        emp.setPanCard(panCard);
+	        emp.setNominee(nominee);
+	        emp.setNomineeContact(nomineeContact);
 
-	@PostMapping("/req1")
-	public Candidate addCandidate(@RequestBody Candidate candidate)
-	{
-		return candidateRepo.save(candidate);
-	}
+	        return employeeService.saveEmployeeDetails( emp, joiningDateString, offerLetter,
+	    			joiningLetter, agreement, experienceLetter, photo,
+	    			 accountHolderName, accountNumber, ifscCode, branch, bankName,
+	    			 panCard,  bloodGroup, nominee,  nomineeContact);
+	    }
+	    
+	   
+	    
 
-	@PostMapping("/save")
-	public AddEmployee saveEmployeeDetails(@Valid @ModelAttribute("addEmployee") AddEmployee emp, 
-			BindingResult result, Model model, 
-			@RequestParam("joiningDateString") String joiningDateString,
-			
-			@RequestParam("accountHolderName") String accountHolderName,
-			@RequestParam("accountNumber") String accountNumber, 
-			@RequestParam("ifscCode") String ifscCode,
-			@RequestParam("branch") String branch,
-			@RequestParam("bankName") String bankName,
-			@RequestParam("panCard") String panCard,
-			@RequestParam("bloodGroup") String bloodGroup, 
-			@RequestParam("nominee") String nominee, 
-			@RequestParam("nomineeContact") String nomineeContact)
-			throws IOException
+	    @GetMapping("/employee")
+	    public List<AddEmployee> getAllEmployees() {
+	        List<AddEmployee> employeeList = employeeService.getAllEmployees();
+	        Collections.sort(employeeList, Comparator.comparing(employee -> {
+	            // Add your sorting logic for employees here
+	            // For example, if you have an employeeId field in AddEmployee class
+	            // and you want to sort based on the last three digits of employeeId:
+	            String employeeId = employee.getEmpId();
+	            String lastDigits = employeeId.substring(Math.max(employeeId.length() - 3, 0));
+	            return Integer.parseInt(lastDigits);
+	        }));
+	        return employeeList;
+	    }
+	    
+	        @PutMapping("/employee/{empId}")
+	        public AddEmployee updateEmployee(@RequestParam("offerLetter") MultipartFile offerLetter,
+	                                           @RequestParam("joiningLetter") MultipartFile joiningLetter,
+	                                           @RequestParam("agreement") MultipartFile agreement,
+	                                           @RequestParam("experienceLetter") MultipartFile experienceLetter,
+	                                           @RequestParam("photo") MultipartFile photo,
+	                                           @RequestParam("accountHolderName") String accountHolderName,
+	                                           @RequestParam("accountNumber") String accountNumber,
+	                                           @RequestParam("ifscCode") String ifscCode,
+	                                           @RequestParam("branch") String branch,
+	                                           @RequestParam("bankName") String bankName,
+	                                           @RequestParam("panCard") String panCard,
+	                                           @RequestParam("bloodGroup") String bloodGroup,
+	                                           @RequestParam("nominee") String nominee,
+	                                           @RequestParam("nomineeContact") String nomineeContact,
+	                                           @RequestParam("joiningDate") Date joiningDate,
+	                                           @RequestParam("candidateId") Candidate candidateId,
+	                                           @PathVariable String empId) throws IOException {
 
-	{
+	            AddEmployee updatedEmployee = employeeService.updateEmployee(empId, offerLetter, joiningLetter, agreement, experienceLetter,
+	            		photo, accountHolderName, accountNumber, ifscCode, branch, bankName, panCard, bloodGroup, nominee, nomineeContact,
+	            		joiningDate, candidateId);
+	            return updatedEmployee;
+	        }
+	        
+	        
+	        
+	        private void writeResponseBytes(byte[] bytes, String filename, HttpServletResponse response) throws IOException {
+	            response.setContentType("application/pdf");
+	            response.setHeader("Content-Disposition", "inline; filename=" + filename);
+	            ServletOutputStream outputStream = response.getOutputStream();
+	            outputStream.write(bytes);
+	            outputStream.flush();
+	        }
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("DD-MM-YYYY"); // Change format string here
-		LocalDate date = LocalDate.parse(joiningDateString, formatter);
+	        @GetMapping("/viewOfferLetter/{empId}")
+	        public void viewOfferLetter(@PathVariable String empId, HttpServletResponse response) throws IOException {
+	            byte[] offerLetterBytes = employeeService.getOfferLetterByEmpId(empId);
+	            writeResponseBytes(offerLetterBytes, "offer_letter.pdf", response);
+	        }
 
-		int year = date.getYear() % 100; // Get the last two digits of the year
-		int dayOfMonth = date.getDayOfMonth();
+	        @GetMapping("/viewJoiningLetter/{empId}")
+	        public void viewJoiningLetter(@PathVariable String empId, HttpServletResponse response) throws IOException {
+	            byte[] joiningLetterBytes = employeeService.getJoiningLetterByEmpId(empId);
+	            writeResponseBytes(joiningLetterBytes, "joining_letter.pdf", response);
+	        }
 
-		String formattedSequenceNumber = String.format("%03d", n);
+	        @GetMapping("/viewAgreement/{empId}")
+	        public void viewAgreement(@PathVariable String empId, HttpServletResponse response) throws IOException {
+	            byte[] agreementBytes = employeeService.getAgreementByEmpId(empId);
+	            writeResponseBytes(agreementBytes, "agreement.pdf", response);
+	        }
 
-		// Combine the year, day of month, and formatted sequence number into the
-		// desired format
-		String output = String.format("%02d%02d%s", year, dayOfMonth, formattedSequenceNumber);
-
-		emp.setEmpId(output);
-		// Increment the sequence number and format it with leading zeros
-				n++;
-		emp.setAccountHolderName(accountHolderName);
-		emp.setAccountNumber(accountNumber);
-		emp.setBankName(bankName);
-		emp.setBloodGroup(bloodGroup);
-
-		emp.setBranch(branch);
-		emp.setIfscCode(ifscCode);
-		emp.setBankName(bankName);
-		emp.setPanCard(panCard);
-		emp.setNominee(nominee);
-		emp.setNomineeContact(nomineeContact);
-
-		
-		java.sql.Date sqlDate = java.sql.Date.valueOf(date);
-		emp.setJoiningDate(sqlDate);
-		
-
-		return addEmployeeRepo.save(emp);
-	}
-
-
-
-//this method used to get one employee record
-
-	@GetMapping("/get/{empId}")
-	public AddEmployee getEmployee(@PathVariable String empId) {
-		return addEmployeeRepo.findById(empId).get();
-	}
-
-	// this method used to get all the records
-
-	@GetMapping("/getAll")
-	public List<AddEmployee> getAll() {
-		List<AddEmployee> list = addEmployeeRepo.findAll();
-
-		return list;
-	}
-
-	// this method used to update the employee records by values
-	@PutMapping("/employees/{empId}")
-	public AddEmployee updateEmployee(
-            @RequestParam("accountHolderName") String accountHolderName,
-            @RequestParam("accountNumber") String accountNumber,
-            @RequestParam("ifscCode") String ifscCode,
-            @RequestParam("branch") String branch,
-            @RequestParam("bankName") String bankName,
-            @RequestParam("panCard") String panCard,
-            @RequestParam("bloodGroup") String bloodGroup,
-            @RequestParam("nominee") String nominee,
-            @RequestParam("nomineeContact") String nomineeContact,
-            @RequestParam("joiningDate") Date joiningDate,
-            @RequestParam("candidateId") Candidate candidateId
-			, @PathVariable String empId) throws IOException 
-	
-	{
-		AddEmployee emp = addEmployeeRepo.findById(empId).get();
-		emp.setAccountHolderName(emp.getAccountHolderName());
-		emp.setAccountNumber(emp.getAccountNumber());
-		
-		emp.setBankName(emp.getBankName());
-		emp.setBloodGroup(emp.getBloodGroup());
-		emp.setBranch(emp.getBranch());
-		
-		emp.setIfscCode(emp.getIfscCode());
-		emp.setPanCard(emp.getPanCard());
-	
-		emp.setNominee(emp.getNominee());
-		emp.setNomineeContact(emp.getNomineeContact());
-	
-		emp.setJoiningDate(emp.getJoiningDate());
-		
-		return addEmployeeRepo.save(emp);
-
-	}
-
+	        @GetMapping("/viewExperienceLetter/{empId}")
+	        public void viewExperienceLetter(@PathVariable String empId, HttpServletResponse response) throws IOException {
+	            byte[] experienceLetterBytes = employeeService.getExperienceLetterByEmpId(empId);
+	            writeResponseBytes(experienceLetterBytes, "experience_letter.pdf", response);
+	        }
 }

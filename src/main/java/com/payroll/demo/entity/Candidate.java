@@ -2,14 +2,20 @@ package com.payroll.demo.entity;
 
 
 import java.sql.Date;
+import java.util.Arrays;
 
+import org.hibernate.sql.ast.tree.from.MappedByTableGroup;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToOne;
 
 @Entity
 public class Candidate{
-		
 
 		@Id
 		@Column(name = "candidate_Id")
@@ -60,6 +66,10 @@ public class Candidate{
 
 		@Column(name = "gender")
 		private String gender;
+	
+		@Lob
+		@Column(name = "resume",length = 50000000)
+		private byte[] resume;
 
 		public String getCandidateId() {
 			return candidateId;
@@ -92,7 +102,6 @@ public class Candidate{
 		public void setFatherName(String fatherName) {
 			this.fatherName = fatherName;
 		}
-
 
 		public String getEmail() {
 			return email;
@@ -190,10 +199,18 @@ public class Candidate{
 			this.gender = gender;
 		}
 
-		public Candidate(String candidateId, String firstName, String lastName, String fatherName,
-				String email, String phoneNumber, String alternateNumber, String address, Date dob, String city,
-				int pincode, String qualification, long aadharNumber, String nationality, String maritalStatus,
-				String gender) {
+		public byte[] getResume() {
+			return resume;
+		}
+
+		public void setResume(byte[] resume) {
+			this.resume = resume;
+		}
+
+		public Candidate(String candidateId, String firstName, String lastName, String fatherName, String email,
+				String phoneNumber, String alternateNumber, String address, Date dob, String city, int pincode,
+				String qualification, long aadharNumber, String nationality, String maritalStatus, String gender,
+				byte[] resume) {
 			super();
 			this.candidateId = candidateId;
 			this.firstName = firstName;
@@ -211,9 +228,8 @@ public class Candidate{
 			this.nationality = nationality;
 			this.maritalStatus = maritalStatus;
 			this.gender = gender;
+			this.resume = resume;
 		}
-
-		
 
 		@Override
 		public String toString() {
@@ -222,7 +238,7 @@ public class Candidate{
 					+ ", alternateNumber=" + alternateNumber + ", address=" + address + ", dob=" + dob + ", city="
 					+ city + ", pincode=" + pincode + ", qualification=" + qualification + ", aadharNumber="
 					+ aadharNumber + ", nationality=" + nationality + ", maritalStatus=" + maritalStatus + ", gender="
-					+ gender + "]";
+					+ gender + ", resume=" + Arrays.toString(resume) + "]";
 		}
 
 		public Candidate() {
@@ -230,5 +246,5 @@ public class Candidate{
 			// TODO Auto-generated constructor stub
 		}
 
-		
+	
 }
