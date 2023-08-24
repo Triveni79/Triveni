@@ -31,7 +31,6 @@ public class Candidate{
 		private String fatherName;
 
 		
-		@Column(name = "email")
 		private String email;
 
 		@Column(name = "phone_Number", unique = true)
